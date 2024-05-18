@@ -1,0 +1,38 @@
+#include "mbed.h"
+#include "MMA8451Q.h" // Example accelerometer library, replace with your specific accelerometer library
+
+// Define the pins for the RGB LED
+PwmOut led_r(p21); // Red LED pin
+PwmOut led_g(p22); // Green LED pin
+PwmOut led_b(p23); // Blue LED pin
+
+// Define I2C pins and accelerometer address
+I2C i2c(p9, p10); // SDA, SCL pins
+MMA8451Q acc(i2c, 0x1D<<1); // Accelerometer address, replace with your device's address
+
+// Function to map accelerometer value to PWM duty cycle
+float map(float value, float in_min, float in_max, float out_min, float out_max) {
+    return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+int main() {
+    while (true) {
+        // Read accelerometer values
+        float x = acc.getAccX();
+        float y = acc.getAccY();
+        float z = acc.getAccZ();
+
+        // Map accelerometer values to PWM duty cycle (0.0 to 1.0)
+        float red_brightness = map(x, -1.0, 1.0, 0.0, 1.0);
+        float green_brightness = map(y, -1.0, 1.0, 0.0, 1.0);
+        float blue_brightness = map(z, -1.0, 1.0, 0.0, 1.0);
+
+        // Set LED brightness
+        led_r = red_brightness;
+        led_g = green_brightness;
+        led_b = blue_brightness;
+
+        // Wait for a short period
+        wait(0.1);
+    }
+}
